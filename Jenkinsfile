@@ -127,12 +127,12 @@ pipeline {
         }
     }
 
-    post {
-        /*always {
+    /*post {
+        always {
             echo 'Slack notifications.'
             slackSend channel: '#dev',
                       color: COLOR_MAP[currentBuild.currentResult],
                       message: "*${currentBuild.currentResult}:* Job: ${env.JOB_NAME} build: ${env.BUILD_ID}\nMore info at: ${env.BUILD_URL}"
-        }*/
-    }
+        }
+    }*/
 }
