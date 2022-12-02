@@ -100,7 +100,7 @@ pipeline {
                     branch 'release/*'
                     allOf {
                         branch 'develop'
-                        changeset pattern: '*'
+                        pullRequestReview(reviewStates: ['approved'])
                     }
                 }
             }
@@ -120,7 +120,7 @@ pipeline {
                     branch 'release/*'
                     allOf {
                         branch 'develop'
-                        changeset pattern: '*'
+                        pullRequestReview(reviewStates: ['approved'])
                     }
                 }
             }
