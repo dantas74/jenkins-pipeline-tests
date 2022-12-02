@@ -100,7 +100,9 @@ pipeline {
                     branch 'release/*'
                     allOf {
                         branch 'develop'
-                        pullRequestReview(reviewStates: ['approved'])
+                        expression {
+                            pullRequestReview(reviewStates: ['approved'])
+                        }
                     }
                 }
             }
