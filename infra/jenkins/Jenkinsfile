@@ -42,15 +42,15 @@ def COLOR_MAP = [
 def getStepsForCiCd(String gitBranch) {
     switch(gitBranch) {
         case 'main':
-            steps = load 'scripts/StagesMain.groovy'
+            return load 'scripts/StagesMain.groovy'
         break
 
         case 'develop':
-            steps = load 'scripts/StagesDev.groovy'
+            return load 'scripts/StagesDev.groovy'
         break
 
         case ~/^release\/.*$/:
-            steps = load 'scripts/StagesRelease.groovy'
+            return load 'scripts/StagesRelease.groovy'
         break
 
         default:
