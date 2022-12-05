@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    options {
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+        disableConcurrentBuilds()
+    }
+
+    def steps = getStepsForCiCd(BRANCH_NAME)
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    steps.build()
+                }
+            }
+        }
+
+        stage('Testing') {
+            steps {
+                script {
+                    steps.test()
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    steps.deploy()
+                }
+            }
+        }
+    }
+}
+
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+]
+
+def getStepsForCiCd(String gitBranch) {
+    switch(gitBranch) {
+        case 'main':
+            steps = load 'scripts/StagesMain.groovy'
+        break
+
+        case 'develop':
+            steps = load 'scripts/StagesDev.groovy'
+        break
+
+        case /^release\/.*$/:
+            steps = load 'scripts/StagesRelease.groovy'
+        break
+
+        default:
+            throw new Exception('Cannot do CI/CD on this branch')
+        break
+    }
+}
