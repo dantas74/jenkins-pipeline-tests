@@ -12,6 +12,8 @@ pipeline {
                 script {
                     def steps = getStepsForCiCd(BRANCH_NAME)
 
+                    echo steps
+
                     steps.build()
                 }
             }
