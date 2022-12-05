@@ -1,17 +1,32 @@
 pipeline {
   agent any
 
-  environment {
-    isGoingToDeploy = true
-  }
-
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
   }
 
+  parameters {
+    string(
+      name: 'payload',
+      defaultValue: '{ "ref": "refs/head/develop", "pull_request": { "merged": false } }',
+      description: 'Default parameter for github webhook')
+  }
+
   stages {
-    stage('Dev branch') {
+    stage('Setup') {
+      steps {
+        script {
+          def jsonObject = readJSON text: payload
+
+          env.isGoingToDeploy = jsonObject.pull_request.merged
+
+          env.environmentToCiCd = getEnvironmentForCiCd(jsonObject.ref)
+        }
+      }
+    }
+
+    stage('Dev Environment') {
       steps {
         build job: 'proesc-backend/ci-dev',
               parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
@@ -19,11 +34,31 @@ pipeline {
               propagate: false
       }
 
-      /*when {
+      when {
         expression {
-          jsonObject.ref == "refs/head/develop"
+          environmentToCiCd == 'dev'
         }
-      }*/
+      }
     }
+  }
+}
+
+def getEnvironmentForCiCd(String ref) {
+  switch(ref) {
+    case 'refs/head/develop':
+      return 'dev'
+    break
+
+    case ~/^refs\/head\/release.*$/:
+      return 'qa'
+    break
+
+    case 'refs/head/main':
+      return 'prod'
+    break
+
+    default:
+      return ''
+    break
   }
 }
