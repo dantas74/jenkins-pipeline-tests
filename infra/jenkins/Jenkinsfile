@@ -1,22 +1,3 @@
-def steps
-switch(gitBranch) {
-    case 'main':
-        return load 'scripts/StagesMain.groovy'
-    break
-
-    case 'develop':
-        return load 'scripts/StagesDev.groovy'
-    break
-
-    case ~/^release\/.*$/:
-        return load 'scripts/StagesRelease.groovy'
-    break
-
-    default:
-        throw new Exception('Cannot do CI/CD on this branch')
-    break
-}
-
 pipeline {
     agent any
 
@@ -31,8 +12,3 @@ pipeline {
         }
     }
 }
-
-def COLOR_MAP = [
-    'SUCCESS': 'good',
-    'FAILURE': 'danger',
-]
