@@ -1,29 +1,34 @@
 pipeline {
   agent any
 
-  environment {
-    isGoingToDeploy = true
-  }
-
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
   }
 
+  parameters {
+    booleanParam(name: 'isGoingToDeploy', defaultValue: false)
+  }
+
   stages {
-    stage('Dev branch') {
+    stage('Testing CI for dev branch') {
       steps {
-        build job: 'proesc-backend/ci-dev',
-              parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
+        echo 'Hello world'
+      }
+    }
+
+    stage('Enable CD') {
+      steps {
+        build job: 'proesc-backend/cd-dev',
               wait: false,
               propagate: false
       }
 
-      /*when {
+      when {
         expression {
-          jsonObject.ref == "refs/head/develop"
+          return params.isGoingToDeploy
         }
-      }*/
+      }
     }
   }
 }
