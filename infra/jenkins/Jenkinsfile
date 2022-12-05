@@ -10,10 +10,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    def steps = getStepsForCiCd(BRANCH_NAME)
-
-                    echo steps
-
+                    def steps = getStepsForCiCd(env.BRANCH_NAME)
                     steps.build()
                 }
             }
