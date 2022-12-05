@@ -1,3 +1,22 @@
+def steps
+switch(gitBranch) {
+    case 'main':
+        return load 'scripts/StagesMain.groovy'
+    break
+
+    case 'develop':
+        return load 'scripts/StagesDev.groovy'
+    break
+
+    case ~/^release\/.*$/:
+        return load 'scripts/StagesRelease.groovy'
+    break
+
+    default:
+        throw new Exception('Cannot do CI/CD on this branch')
+    break
+}
+
 pipeline {
     agent any
 
@@ -10,7 +29,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    def steps = getStepsForCiCd(env.BRANCH_NAME)
                     steps.build()
                 }
             }
@@ -38,23 +56,3 @@ def COLOR_MAP = [
     'SUCCESS': 'good',
     'FAILURE': 'danger',
 ]
-
-def getStepsForCiCd(String gitBranch) {
-    switch(gitBranch) {
-        case 'main':
-            return load 'scripts/StagesMain.groovy'
-        break
-
-        case 'develop':
-            return load 'scripts/StagesDev.groovy'
-        break
-
-        case ~/^release\/.*$/:
-            return load 'scripts/StagesRelease.groovy'
-        break
-
-        default:
-            throw new Exception('Cannot do CI/CD on this branch')
-        break
-    }
-}
