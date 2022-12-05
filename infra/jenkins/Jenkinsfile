@@ -10,20 +10,20 @@ pipeline {
 
     stages {
         stage('Build') {
-            script {
-                steps.build()
+            steps {
+                echo 'Testando'
             }
         }
 
         stage('Testing') {
-            script {
-                steps.test()
+            steps {
+                echo 'Testando'
             }
         }
 
         stage('Deploy') {
-            script {
-                steps.deploy()
+            steps {
+                echo 'Testando'
             }
         }
     }
