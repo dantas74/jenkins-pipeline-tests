@@ -44,7 +44,7 @@ def getStepsForCiCd(String gitBranch) {
             steps = load 'scripts/StagesDev.groovy'
         break
 
-        case /^release\/.*$/:
+        case ~/^release\/.*$/:
             steps = load 'scripts/StagesRelease.groovy'
         break
 
