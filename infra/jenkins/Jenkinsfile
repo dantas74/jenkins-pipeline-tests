@@ -1,5 +1,3 @@
-def steps = getStepsForCiCd(BRANCH_NAME)
-
 pipeline {
     agent any
 
@@ -11,19 +9,27 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Testando'
+                script {
+                    def steps = getStepsForCiCd(BRANCH_NAME)
+
+                    steps.build()
+                }
             }
         }
 
         stage('Testing') {
             steps {
-                echo 'Testando'
+                script {
+                    steps.test()
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Testando'
+                script {
+                    steps.deploy()
+                }
             }
         }
     }
