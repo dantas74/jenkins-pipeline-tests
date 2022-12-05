@@ -1,3 +1,5 @@
+def steps = getStepsForCiCd(BRANCH_NAME)
+
 pipeline {
     agent any
 
@@ -5,8 +7,6 @@ pipeline {
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
         disableConcurrentBuilds()
     }
-
-    def steps = getStepsForCiCd(BRANCH_NAME)
 
     stages {
         stage('Build') {
