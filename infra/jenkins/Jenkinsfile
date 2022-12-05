@@ -26,28 +26,8 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
-            steps {
-                script {
-                    steps.build()
-                }
-            }
-        }
-
-        stage('Testing') {
-            steps {
-                script {
-                    steps.test()
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    steps.deploy()
-                }
-            }
+        stage('Hello World') {
+            echo 'Hello world'
         }
     }
 }
