@@ -58,17 +58,10 @@ pipeline {
           env.prodCiCd = (
             mergeRef == 'main' && (action == 'opened' || action == 'merged')
           ) || (pushRef == 'refs/heads/main')
-        }
-      }
-    }
 
-    stage('Debug') {
-      steps {
-        script {
-          echo((env.mergeRef == 'develop' && (action == 'opened' || action == 'merged')).toString())
-          echo((env.pushRef == 'refs/heads/develop').toString())
-          echo((env.pushRef ==~ /refs\/heads\/release.*$/).toString())
-          echo((env.mergeIsGoingToDeploy != '' ? true : env.pushRef != '').toString())
+          echo(env.devCiCd.toString())
+          echo(env.qaCiCd.toString())
+          echo(env.prodCiCd.toString())
         }
       }
     }
