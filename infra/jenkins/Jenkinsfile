@@ -41,7 +41,7 @@ pipeline {
 
       when {
         expression {
-          ref == 'refs/head/develop' && (!action || (action == 'opened' || action == 'merged'))
+          return ref == 'refs/head/develop' && (action == '' || (action == 'opened' || action == 'merged'))
         }
       }
     }
@@ -57,7 +57,7 @@ pipeline {
 
       when {
         expression {
-          ref ==~ /refs\/head\/release.*$/ && (!action || (action == 'opened' || action == 'merged'))
+          return ref ==~ /refs\/head\/release.*$/ && (action == '' || (action == 'opened' || action == 'merged'))
         }
       }
     }
@@ -73,7 +73,7 @@ pipeline {
 
       when {
         expression {
-          ref == 'main' && (!action || (action == 'opened' || action == 'merged'))
+          return ref == 'refs/head/main' && (action == '' || (action == 'opened' || action == 'merged'))
         }
       }
     }
