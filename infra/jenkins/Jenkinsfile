@@ -62,6 +62,17 @@ pipeline {
       }
     }
 
+    stage('Debug') {
+      steps {
+        script {
+          echo env.mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
+          echo env.pushRef == 'refs/head/develop'
+          echo env.pushRef ==~ /refs\/head\/release.*$/
+          echo env.mergeIsGoingToDeploy ?: env.pushRef != ''
+        }
+      }
+    }
+
     stage('Dev Environment') {
       steps {
         build job: 'proesc-backend/ci-dev',
