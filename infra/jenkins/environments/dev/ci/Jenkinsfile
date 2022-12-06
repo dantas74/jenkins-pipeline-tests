@@ -11,6 +11,19 @@ pipeline {
   }
 
   stages {
+    stage('Checkout SCM') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: '*/develop']],
+          extensions: [[$class: 'CleanCheckout']],
+          doGenerateSubmoduleConfigurations: false,
+          submoduleCfg: [],
+          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+        ])
+      }
+    }
+
     stage('Testing CI for dev branch') {
       steps {
         echo 'Hello world'

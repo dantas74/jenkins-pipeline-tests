@@ -10,13 +10,27 @@ pipeline {
     GenericTrigger (
       genericVariables: [
         [key: 'ref', value: '$.ref', defaultValue: 'refs/head/develop'],
-        [key: 'isGoingToDeploy', value: '$.pull_request.merged', defaultValue: 'false']
+        [key: 'isGoingToDeploy', value: '$.pull_request.merged', defaultValue: 'false'],
+        [key: 'action', value: '$.action', defaultValue: '']
       ],
       token: 'proesc-backend'
     )
   }
 
   stages {
+    stage('Checkout SCM') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: '*/develop'], [name: '*/release*'], [name: '*/main']],
+          extensions: [[$class: 'CleanCheckout']],
+          doGenerateSubmoduleConfigurations: false,
+          submoduleCfg: [],
+          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+        ])
+      }
+    }
+
     stage('Dev Environment') {
       steps {
         build job: 'proesc-backend/ci-dev',
@@ -27,7 +41,7 @@ pipeline {
 
       when {
         expression {
-          ref == 'refs/head/develop'
+          ref == 'refs/head/develop' && (action == 'opened' || action == 'merged')
         }
       }
     }
