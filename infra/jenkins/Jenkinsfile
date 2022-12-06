@@ -9,9 +9,10 @@ pipeline {
   triggers {
     GenericTrigger (
       genericVariables: [
-        [key: 'ref', value: '$.ref', defaultValue: 'refs/head/develop'],
-        [key: 'isGoingToDeploy', value: '$.pull_request.merged', defaultValue: 'false'],
-        [key: 'action', value: '$.action', defaultValue: '']
+        [key: 'pushRef', value: '$.ref', defaultValue: ''],
+        [key: 'mergeRef', value: '$.base.ref', defaultValue: ''],
+        [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: 'false'],
+        [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
       token: 'proesc-backend'
     )
@@ -31,6 +32,26 @@ pipeline {
       }
     }
 
+    stage('Setup') {
+      steps {
+        script {
+          env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef != ''
+
+          env.devCiCd = (
+            mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
+          ) || (pushRef == 'refs/head/develop')
+
+          env.qaCiCd = (
+            mergeRef ==~ /refs\/head\/release.*$/ && (action == 'opened' || action == 'merged')
+          ) || (pushRef ==~ /refs\/head\/release.*$/)
+
+          env.prodCiCd = (
+            mergeRef == 'refs/head/main' && (action == 'opened' || action == 'merged')
+          ) || (pushRef == 'refs/head/main')
+        }
+      }
+    }
+
     stage('Dev Environment') {
       steps {
         build job: 'proesc-backend/ci-dev',
@@ -41,7 +62,7 @@ pipeline {
 
       when {
         expression {
-          return ref == 'refs/head/develop' && (action == '' || (action == 'opened' || action == 'merged'))
+          return env.devCiCd
         }
       }
     }
@@ -57,7 +78,7 @@ pipeline {
 
       when {
         expression {
-          return ref ==~ /refs\/head\/release.*$/ && (action == '' || (action == 'opened' || action == 'merged'))
+          return env.qaCiCd
         }
       }
     }
@@ -72,8 +93,10 @@ pipeline {
       }
 
       when {
-        expression {
-          return ref == 'refs/head/main' && (action == '' || (action == 'opened' || action == 'merged'))
+        anyOf {
+          expression {
+            return env.prodCiCd
+          }
         }
       }
     }
