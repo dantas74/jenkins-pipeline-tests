@@ -20,8 +20,8 @@ pipeline {
     stage('Enable CD') {
       steps {
         build job: 'proesc-backend/cd-dev',
-              wait: false,
-              propagate: false
+          wait: false,
+          propagate: false
       }
 
       when {
