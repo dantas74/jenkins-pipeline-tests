@@ -35,16 +35,26 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.isGoingToDeploy = env.mergeIsGoingToDeploy ?: pushRef != ''
+          // Defining vars to use in script
+          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy
+          def mergeRef = env.mergeRef
+          def pushRef = env.pushRef
+          def action = env.action
 
+          // Checking if is going to deploy based on merge or push
+          env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef != ''
+
+          // Validation of dev environment
           env.devCiCd = (
             mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
           ) || (pushRef == 'refs/head/develop')
 
+          // Validation of qa environment
           env.qaCiCd = (
             mergeRef ==~ /refs\/head\/release.*$/ && (action == 'opened' || action == 'merged')
           ) || (pushRef ==~ /refs\/head\/release.*$/)
 
+          // Validation of prod environment
           env.prodCiCd = (
             mergeRef == 'refs/head/main' && (action == 'opened' || action == 'merged')
           ) || (pushRef == 'refs/head/main')
