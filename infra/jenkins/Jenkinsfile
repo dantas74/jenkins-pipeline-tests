@@ -11,7 +11,7 @@ pipeline {
       genericVariables: [
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
         [key: 'mergeRef', value: '$.base.ref', defaultValue: ''],
-        [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: 'false'],
+        [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
       token: 'proesc-backend'
@@ -36,7 +36,7 @@ pipeline {
       steps {
         script {
           // Defining vars to use in script
-          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy
+          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy != '' ? true : env.pushRef != ''
           def mergeRef = env.mergeRef
           def pushRef = env.pushRef
           def action = env.action
@@ -46,18 +46,18 @@ pipeline {
 
           // Validation of dev environment
           env.devCiCd = (
-            mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
-          ) || (pushRef == 'refs/head/develop')
+            mergeRef == 'develop' && (action == 'opened' || action == 'merged')
+          ) || (pushRef == 'refs/heads/develop')
 
           // Validation of qa environment
           env.qaCiCd = (
-            mergeRef ==~ /refs\/head\/release.*$/ && (action == 'opened' || action == 'merged')
-          ) || (pushRef ==~ /refs\/head\/release.*$/)
+            mergeRef ==~ /release.*$/ && (action == 'opened' || action == 'merged')
+          ) || (pushRef ==~ /refs\/heads\/release.*$/)
 
           // Validation of prod environment
           env.prodCiCd = (
-            mergeRef == 'refs/head/main' && (action == 'opened' || action == 'merged')
-          ) || (pushRef == 'refs/head/main')
+            mergeRef == 'main' && (action == 'opened' || action == 'merged')
+          ) || (pushRef == 'refs/heads/main')
         }
       }
     }
@@ -65,10 +65,10 @@ pipeline {
     stage('Debug') {
       steps {
         script {
-          echo((env.mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')).toString())
-          echo((env.pushRef == 'refs/head/develop').toString())
-          echo((env.pushRef ==~ /refs\/head\/release.*$/).toString())
-          echo((env.mergeIsGoingToDeploy ?: env.pushRef != '').toString())
+          echo((env.mergeRef == 'develop' && (action == 'opened' || action == 'merged')).toString())
+          echo((env.pushRef == 'refs/heads/develop').toString())
+          echo((env.pushRef ==~ /refs\/heads\/release.*$/).toString())
+          echo((env.mergeIsGoingToDeploy != '' ? true : env.pushRef != '').toString())
         }
       }
     }
