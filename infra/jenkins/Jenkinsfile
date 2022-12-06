@@ -35,7 +35,7 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef != ''
+          env.isGoingToDeploy = env.mergeIsGoingToDeploy ?: pushRef != ''
 
           env.devCiCd = (
             mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
