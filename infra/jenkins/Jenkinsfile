@@ -65,10 +65,10 @@ pipeline {
     stage('Debug') {
       steps {
         script {
-          echo env.mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')
-          echo env.pushRef == 'refs/head/develop'
-          echo env.pushRef ==~ /refs\/head\/release.*$/
-          echo env.mergeIsGoingToDeploy ?: env.pushRef != ''
+          echo((env.mergeRef == 'refs/head/develop' && (action == 'opened' || action == 'merged')).toString())
+          echo((env.pushRef == 'refs/head/develop').toString())
+          echo((env.pushRef ==~ /refs\/head\/release.*$/).toString())
+          echo((env.mergeIsGoingToDeploy ?: env.pushRef != '').toString())
         }
       }
     }
