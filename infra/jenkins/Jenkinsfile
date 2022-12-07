@@ -79,6 +79,8 @@ pipeline {
 
           echo env.auxiliaryCi.toString()
           echo env.devCiCd.toString()
+          echo env.mergeAction
+          echo action
         }
       }
     }
