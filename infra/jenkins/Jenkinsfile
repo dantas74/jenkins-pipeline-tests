@@ -11,6 +11,7 @@ pipeline {
       genericVariables: [
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
         [key: 'mergeRef', value: '$.base.ref', defaultValue: ''],
+        [key: 'branchRef', value: '$.head.ref', defaultValue: '']
         [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
@@ -23,7 +24,14 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: '*/develop'], [name: '*/release*'], [name: '*/main']],
+          branches: [
+            [name: '*/develop'],
+            [name: '*/release*'],
+            [name: '*/main'],
+            [name: '*/feature*'],
+            [name: '*/hotfix*'],
+            [name: '*/bugfix*']
+          ],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -36,28 +44,53 @@ pipeline {
       steps {
         script {
           // Defining vars to use in script
-          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy != '' ? true : env.pushRef != ''
+          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy != '' ? true : false
           def mergeRef = env.mergeRef
+          def branchRef = env.branchRef
           def pushRef = env.pushRef
           def action = env.action
 
           // Checking if is going to deploy based on merge or push
-          env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef != ''
+          env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef ==~ /^refs\/heads\/(develop|release|main).*$/
+
+          // Validation of auxiliary branches
+          env.auxiliaryCi = (
+            mergeRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'opened'
+          )
 
           // Validation of dev environment
           env.devCiCd = (
-            mergeRef == 'develop' && (action == 'opened' || action == 'merged')
-          ) || (pushRef == 'refs/heads/develop')
+            mergeRef == 'develop' && env.isGoingToDeploy
+          ) || (pushRef == 'refs/heads/develop') || (
+            branchRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed'
+          )
 
           // Validation of qa environment
           env.qaCiCd = (
-            mergeRef ==~ /release.*$/ && (action == 'opened' || action == 'merged')
+            mergeRef ==~ /release.*$/ && env.isGoingToDeploy
           ) || (pushRef ==~ /refs\/heads\/release.*$/)
 
           // Validation of prod environment
           env.prodCiCd = (
-            mergeRef == 'main' && (action == 'opened' || action == 'merged')
-          ) || (pushRef == 'refs/heads/main')
+            mergeRef == 'main' && env.isGoingToDeploy
+          ) || (pushRef == 'refs/heads/main') || (
+            branchRef ==~ /^hotfix.*$/ && action == 'closed'
+          )
+        }
+      }
+    }
+
+    stage('Auxiliary branch') {
+      steps {
+        build job: 'proesc-backend/ci-auxiliary',
+          parameters: [string(name: 'branchName', value: branchRef)],
+          wait: false,
+          propagate: false
+      }
+
+      when {
+        expression {
+          return env.auxiliaryCi.toBoolean()
         }
       }
     }

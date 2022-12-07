@@ -1,0 +1,33 @@
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+    disableConcurrentBuilds()
+  }
+
+  parameters {
+    string(name: 'branchName', defaultValue: '')
+  }
+
+  stages {
+    stage('Checkout SCM') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: "*/${params.branchName}"]],
+          extensions: [[$class: 'CleanCheckout']],
+          doGenerateSubmoduleConfigurations: false,
+          submoduleCfg: [],
+          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+        ])
+      }
+    }
+
+    stage('Testing CI for auxiliary branch') {
+      steps {
+        echo 'Hello world'
+      }
+    }
+  }
+}
