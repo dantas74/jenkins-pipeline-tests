@@ -79,8 +79,7 @@ pipeline {
 
           echo env.auxiliaryCi.toString()
           echo env.devCiCd.toString()
-          echo env.mergeAction
-          echo action
+          echo((branchRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')).toString())
         }
       }
     }
