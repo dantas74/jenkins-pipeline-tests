@@ -55,7 +55,7 @@ pipeline {
 
           // Validation of auxiliary branches
           env.auxiliaryCi = (
-            mergeRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'opened'
+            branchRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')
           )
 
           // Validation of dev environment
