@@ -11,7 +11,7 @@ pipeline {
       genericVariables: [
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
         [key: 'mergeRef', value: '$.base.ref', defaultValue: ''],
-        [key: 'branchRef', value: '$.head.ref', defaultValue: '']
+        [key: 'branchRef', value: '$.head.ref', defaultValue: ''],
         [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
