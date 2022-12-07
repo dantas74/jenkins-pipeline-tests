@@ -10,9 +10,10 @@ pipeline {
     GenericTrigger (
       genericVariables: [
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
-        [key: 'mergeRef', value: '$.pull_request.base.ref', defaultValue: ''],
-        [key: 'branchRef', value: '$.pull_request.head.ref', defaultValue: ''],
+        [key: 'baseRef', value: '$.pull_request.base.ref', defaultValue: ''],
+        [key: 'headRef', value: '$.pull_request.head.ref', defaultValue: ''],
         [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
+        [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
       token: 'proesc-backend'
@@ -45,8 +46,8 @@ pipeline {
         script {
           // Defining vars to use in script
           def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy != '' ? true : false
-          def mergeRef = env.mergeRef
-          def branchRef = env.branchRef
+          def baseRef = env.baseRef
+          def headRef = env.headRef
           def pushRef = env.pushRef
           def action = env.mergeAction
 
@@ -55,26 +56,26 @@ pipeline {
 
           // Validation of auxiliary branches
           env.auxiliaryCi = (
-            branchRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')
+            headRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')
           )
 
           // Validation of dev environment
           env.devCiCd = (
-            mergeRef == 'develop' && env.isGoingToDeploy
+            baseRef == 'develop' && env.isGoingToDeploy
           ) || (pushRef == 'refs/heads/develop') || (
-            branchRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed'
+            headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed'
           )
 
           // Validation of qa environment
           env.qaCiCd = (
-            mergeRef ==~ /release.*$/ && env.isGoingToDeploy
+            baseRef ==~ /release.*$/ && env.isGoingToDeploy
           ) || (pushRef ==~ /refs\/heads\/release.*$/)
 
           // Validation of prod environment
           env.prodCiCd = (
-            mergeRef == 'main' && env.isGoingToDeploy
+            baseRef == 'main' && env.isGoingToDeploy
           ) || (pushRef == 'refs/heads/main') || (
-            branchRef ==~ /^hotfix.*$/ && action == 'closed'
+            headRef ==~ /^hotfix.*$/ && action == 'closed'
           )
         }
       }
@@ -83,14 +84,14 @@ pipeline {
     stage('Auxiliary branch') {
       steps {
         build job: 'proesc-backend/ci-auxiliary',
-          parameters: [string(name: 'branchName', value: branchRef)],
+          parameters: [string(name: 'branchName', value: headRef)],
           wait: false,
           propagate: false
       }
 
       when {
         expression {
-          return env.auxiliaryCi.toBoolean()
+          return env.auxiliaryCi.toBoolean() && env.isMergeable.toBoolean()
         }
       }
     }
@@ -112,7 +113,7 @@ pipeline {
 
     stage('Qa Environment') {
       steps {
-        // TODO: Change job to correct pipeline
+        // TODO: Change job to correct pipeline and environment
         build job: 'proesc-backend/ci-dev',
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
@@ -128,7 +129,7 @@ pipeline {
 
     stage('Prod Environment') {
       steps {
-        // TODO: Change job to correct pipeline
+        // TODO: Change job to correct pipeline and environment
         build job: 'proesc-backend/ci-dev',
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
