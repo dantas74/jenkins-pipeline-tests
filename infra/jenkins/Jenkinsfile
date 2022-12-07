@@ -77,9 +77,8 @@ pipeline {
             branchRef ==~ /^hotfix.*$/ && action == 'closed'
           )
 
-          echo env.auxiliaryCi.toString()
-          echo env.devCiCd.toString()
-          echo((branchRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')).toString())
+          echo((branchRef ==~ /^(feature|hotfix|bugfix).*$/).toString())
+          echo(((action == 'opened' || action == 'reopened')).toString())
         }
       }
     }
