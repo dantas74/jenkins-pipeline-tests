@@ -12,8 +12,8 @@ pipeline {
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
         [key: 'baseRef', value: '$.pull_request.base.ref', defaultValue: ''],
         [key: 'headRef', value: '$.pull_request.head.ref', defaultValue: ''],
-        [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: false],
-        [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: false],
+        [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
+        [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
       token: 'proesc-backend'
@@ -45,7 +45,7 @@ pipeline {
       steps {
         script {
           // Defining vars to use in script
-          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy
+          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy == 'true'
           def baseRef = env.baseRef
           def headRef = env.headRef
           def pushRef = env.pushRef
