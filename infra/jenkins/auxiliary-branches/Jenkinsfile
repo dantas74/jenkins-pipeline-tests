@@ -15,7 +15,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: "*/develop"], [name: "*/${params.branchName}"]],
+          branches: [[name: "*/develop"]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -26,7 +26,8 @@ pipeline {
 
     stage('Merging branch into develop') {
       steps {
-        sh "git branch"
+        sh "git checkout ${params.branchName} && git checkout develop"
+        sh 'git branch | grep merge-branch > ./tmp.txt; if [[ "$(< ./tmp.txt)" == "  merge-branch" ]]; then git branch -d merge-branch; fi; rm -rf ./tmp.txt'
         sh 'git checkout -b merge-branch'
         sh "git merge ${params.branchName}"
       }
@@ -35,14 +36,6 @@ pipeline {
     stage('Testing CI for auxiliary branch') {
       steps {
         echo 'Hello world'
-      }
-    }
-
-    stage('Branch cleanup') {
-      steps {
-        sh 'git reset HEAD --hard'
-        sh 'git checkout develop'
-        sh "git branch -d merge-branch"
       }
     }
   }
