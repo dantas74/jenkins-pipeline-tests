@@ -26,7 +26,7 @@ pipeline {
 
     stage('Merging branch into develop') {
       steps {
-        sh 'git switch -c merge-branch'
+        sh 'git checkout -b merge-branch'
         sh "git merge ${params.branchName}"
       }
     }
@@ -40,7 +40,7 @@ pipeline {
     stage('Branch cleanup') {
       steps {
         sh 'git reset HEAD --hard'
-        sh 'git switch develop'
+        sh 'git checkout develop'
         sh "git branch -d merge-branch"
       }
     }
