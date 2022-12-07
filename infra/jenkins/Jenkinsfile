@@ -76,6 +76,9 @@ pipeline {
           ) || (pushRef == 'refs/heads/main') || (
             branchRef ==~ /^hotfix.*$/ && action == 'closed'
           )
+
+          echo env.auxiliaryCi.toString()
+          echo env.devCiCd.toString()
         }
       }
     }
