@@ -10,8 +10,8 @@ pipeline {
     GenericTrigger (
       genericVariables: [
         [key: 'pushRef', value: '$.ref', defaultValue: ''],
-        [key: 'mergeRef', value: '$.base.ref', defaultValue: ''],
-        [key: 'branchRef', value: '$.head.ref', defaultValue: ''],
+        [key: 'mergeRef', value: '$.pull_request.base.ref', defaultValue: ''],
+        [key: 'branchRef', value: '$.pull_request.head.ref', defaultValue: ''],
         [key: 'mergeIsGoingToDeploy', value: '$.pull_request.merged', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
@@ -76,9 +76,6 @@ pipeline {
           ) || (pushRef == 'refs/heads/main') || (
             branchRef ==~ /^hotfix.*$/ && action == 'closed'
           )
-
-          echo((branchRef ==~ /^(feature|hotfix|bugfix).*$/).toString())
-          echo(((action == 'opened' || action == 'reopened')).toString())
         }
       }
     }
