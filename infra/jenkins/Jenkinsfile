@@ -48,7 +48,7 @@ pipeline {
           def mergeRef = env.mergeRef
           def branchRef = env.branchRef
           def pushRef = env.pushRef
-          def action = env.action
+          def action = env.mergeAction
 
           // Checking if is going to deploy based on merge or push
           env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef ==~ /^refs\/heads\/(develop|release|main).*$/
