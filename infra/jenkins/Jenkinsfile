@@ -60,8 +60,8 @@ pipeline {
           )
 
           echo 'Debuggin auxiliary'
-          echo (headRef ==~ /^(feature|hotfix|bugfix).*$/).toString()
-          echo (action == 'opened' || action == 'reopened').toString()
+          echo((headRef ==~ /^(feature|hotfix|bugfix).*$/).toString())
+          echo((action == 'opened' || action == 'reopened').toString())
 
           // Validation of dev environment
           env.devCiCd = (
@@ -71,9 +71,9 @@ pipeline {
           )
 
           echo 'Debugging dev'
-          echo (baseRef == 'develop' && env.isGoingToDeploy).toString()
-          echo (pushRef == 'refs/heads/develop').toString()
-          echo (headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy).toString()
+          echo((baseRef == 'develop' && env.isGoingToDeploy).toString())
+          echo((pushRef == 'refs/heads/develop').toString())
+          echo((headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy).toString())
 
           // Validation of qa environment
           env.qaCiCd = (
