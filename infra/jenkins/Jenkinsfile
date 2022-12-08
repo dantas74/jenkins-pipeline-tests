@@ -45,7 +45,7 @@ pipeline {
       steps {
         script {
           // Defining vars to use in script
-          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy.toBoolean()
+          def mergeIsGoingToDeploy = env.mergeIsGoingToDeploy
           def baseRef = env.baseRef
           def headRef = env.headRef
           def pushRef = env.pushRef
