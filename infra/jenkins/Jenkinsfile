@@ -66,7 +66,7 @@ pipeline {
           env.devCiCd = (
             baseRef == 'develop' && env.isGoingToDeploy
           ) || (pushRef == 'refs/heads/develop') || (
-            headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed'
+            headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy
           )
 
           // Validation of qa environment
@@ -78,7 +78,7 @@ pipeline {
           env.prodCiCd = (
             baseRef == 'main' && env.isGoingToDeploy
           ) || (pushRef == 'refs/heads/main') || (
-            headRef ==~ /^hotfix.*$/ && action == 'closed'
+            headRef ==~ /^hotfix.*$/ && action == 'closed' && env.isGoingToDeploy
           )
         }
       }
@@ -94,7 +94,7 @@ pipeline {
 
       when {
         expression {
-          return env.auxiliaryCi.toBoolean()
+          return env.auxiliaryCi.toBoolean() && env.isMergeable != null && env.isMergeable.toBoolean()
         }
       }
     }
