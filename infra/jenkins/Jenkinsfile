@@ -52,7 +52,7 @@ pipeline {
           def action = env.mergeAction
 
           echo env.isMergeable.toString()
-          echo env.mergeIsGoingToDeploy()
+          echo env.mergeIsGoingToDeploy.toString()
 
           // Checking if is going to deploy based on merge or push
           env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef ==~ /^refs\/heads\/(develop|release|main).*$/
