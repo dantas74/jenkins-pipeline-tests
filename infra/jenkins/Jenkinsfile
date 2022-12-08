@@ -72,6 +72,7 @@ pipeline {
           )
 
           echo 'Debugging dev'
+          echo((env.isGoingToDeploy).toString())
           echo((baseRef == 'develop' && env.isGoingToDeploy).toString())
           echo((pushRef == 'refs/heads/develop').toString())
           echo((headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy).toString())
@@ -101,7 +102,7 @@ pipeline {
 
       when {
         expression {
-          return env.auxiliaryCi.toBoolean() && env.isMergeable != null && env.isMergeable.toBoolean()
+          return env.auxiliaryCi.toBoolean() && env.isMergeable != 'null' && env.isMergeable.toBoolean()
         }
       }
     }
