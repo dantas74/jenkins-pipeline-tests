@@ -29,7 +29,7 @@ pipeline {
         // This is made to get these repositories in local
         sh "git checkout ${params.branchName} && git checkout develop"
 
-        // This is made to delete last merge-branch of previous results
+        // This is made to delete last merge-branch of previous result
         sh 'git branch | grep merge-branch > ./tmp.txt; if [[ "$(< ./tmp.txt)" == "  merge-branch" ]]; then git branch -d merge-branch; fi; rm -rf ./tmp.txt'
 
         // This creates a new version simulating the dev branch with changes proposed in PR
