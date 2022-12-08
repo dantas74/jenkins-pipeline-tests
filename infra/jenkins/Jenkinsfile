@@ -72,7 +72,9 @@ pipeline {
           )
 
           echo 'Debugging dev'
+          echo((mergeIsGoingToDeploy).toString())
           echo((env.isGoingToDeploy).toString())
+          echo((pushRef ==~ /^refs\/heads\/(develop|release|main).*$/).toString())
           echo((baseRef == 'develop' && env.isGoingToDeploy).toString())
           echo((pushRef == 'refs/heads/develop').toString())
           echo((headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy).toString())
