@@ -49,18 +49,21 @@ pipeline {
           def baseRef = env.baseRef
           def headRef = env.headRef
           def pushRef = env.pushRef
-          def action = env.mergeAction
-
-          echo env.mergeIsGoingToDeploy.toString()
-          echo env.mergeIsGoingToDeploy
+          def action = env.mergeAction          
 
           // Checking if is going to deploy based on merge or push
           env.isGoingToDeploy = mergeIsGoingToDeploy ?: pushRef ==~ /^refs\/heads\/(develop|release|main).*$/
+
+          echo env.isGoingToDeploy
 
           // Validation of auxiliary branches
           env.auxiliaryCi = (
             headRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')
           )
+
+          echo headRef
+          echo action
+          echo pushRef
 
           // Validation of dev environment
           env.devCiCd = (
