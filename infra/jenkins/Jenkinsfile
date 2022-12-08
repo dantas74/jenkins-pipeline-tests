@@ -60,33 +60,28 @@ pipeline {
           )
 
           echo 'Debuggin auxiliary'
-          echo((headRef ==~ /^(feature|hotfix|bugfix).*$/).toString())
-          echo((action == 'opened' || action == 'reopened').toString())
-          echo((env.auxiliaryCi).toString())
+          echo((env.isMergeable).toString())
+          echo((env.isMergeable.toBoolean()).toString())
+          echo((env.isMergeable != 'null' && env.isMergeable.toBoolean()).toString)
 
           // Validation of dev environment
           env.devCiCd = (
-            baseRef == 'develop' && env.isGoingToDeploy
+            baseRef == 'develop' && env.isGoingToDeploy.toBoolean()
           ) || (pushRef == 'refs/heads/develop') || (
             headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy
           )
 
           echo 'Debugging dev'
-          echo((mergeIsGoingToDeploy).toString())
-          echo((env.isGoingToDeploy).toString())
-          echo((pushRef ==~ /^refs\/heads\/(develop|release|main).*$/).toString())
-          echo((baseRef == 'develop' && env.isGoingToDeploy).toString())
-          echo((pushRef == 'refs/heads/develop').toString())
-          echo((headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy).toString())
+          echo((baseRef == 'develop' && env.isGoingToDeploy.toBoolean()).toString())
 
           // Validation of qa environment
           env.qaCiCd = (
-            baseRef ==~ /release.*$/ && env.isGoingToDeploy
+            baseRef ==~ /release.*$/ && env.isGoingToDeploy.toBoolean()
           ) || (pushRef ==~ /refs\/heads\/release.*$/)
 
           // Validation of prod environment
           env.prodCiCd = (
-            baseRef == 'main' && env.isGoingToDeploy
+            baseRef == 'main' && env.isGoingToDeploy.toBoolean()
           ) || (pushRef == 'refs/heads/main') || (
             headRef ==~ /^hotfix.*$/ && action == 'closed' && env.isGoingToDeploy
           )
