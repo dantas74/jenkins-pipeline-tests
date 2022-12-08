@@ -66,9 +66,6 @@ pipeline {
             headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy
           )
 
-          echo 'Debugging dev'
-          echo((baseRef == 'develop' && env.isGoingToDeploy.toBoolean()).toString())
-
           // Validation of qa environment
           env.qaCiCd = (
             baseRef ==~ /release.*$/ && env.isGoingToDeploy.toBoolean()
