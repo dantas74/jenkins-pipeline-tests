@@ -149,23 +149,23 @@ pipeline {
   post {
     success {
       withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/"$GIT_COMMIT"?access_token="$TOKEN"" \
+        sh """
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT?access_token=""" + TOKEN +"""" \
             -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"state\": \"success\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \""$JENKINS_URL"/job/"$JOB_NAME"/"$BUILD_NUMBER"/console\"}"
-          '''
+            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "$JENKINS_URL/job/$JOB_NAME/$BUILD_NUMBER/console"}'
+          """ 
       }
     }
 
     failure {
       withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/"$GIT_COMMIT"?access_token="$TOKEN"" \
+        sh """
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT?access_token=""" + TOKEN +"""" \
             -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"state\": \"failure\",\"context\": \"continuous-integration/jenkins\", \"description\": \"Jenkins\", \"target_url\": \""$JENKINS_URL"/job/"$JOB_NAME"/"$BUILD_NUMBER"/console\"}"
-          '''
+            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "$JENKINS_URL/job/$JOB_NAME/$BUILD_NUMBER/console"}'
+          """ 
       }
     }
   }
