@@ -38,10 +38,35 @@ pipeline {
       }
     }
 
-    stage('Testing CI for auxiliary branch') {
-      steps {
-        echo 'Hello world'
-      }
+    stage('Debug') {
+      echo GIT_URL
     }
+
+    /*stage('Cleaning old dependencies and cache') {
+        steps {
+            sh 'composer clearcache'
+            sh 'rm -rf vendor/*'
+        }
+    }
+
+    stage('Installing dependencies') {
+        steps {
+            sh 'composer install'
+        }
+    }
+
+    stage('Building image with docker') {
+        steps {
+            script {
+                dockerImage = docker.build(".")
+            }
+        }
+    }
+
+    stage('Testing project') {
+        steps {
+            sh './vendor/bin/phpunit'
+        }
+    }*/
   }
 }
