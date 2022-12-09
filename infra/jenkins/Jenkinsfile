@@ -1,5 +1,9 @@
 pipeline {
   agent any
+  
+  environment {
+    PROJECT_NAME = 'proesc-backend'
+  }
 
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
@@ -65,9 +69,6 @@ pipeline {
           ) || (pushRef == 'refs/heads/develop') || (
             headRef ==~ /^(feature|hotfix|bugfix).*$/ && action == 'closed' && env.isGoingToDeploy
           )
-
-          echo 'Debugging dev'
-          echo((baseRef == 'develop' && env.isGoingToDeploy.toBoolean()).toString())
 
           // Validation of qa environment
           env.qaCiCd = (
@@ -145,6 +146,36 @@ pipeline {
             return env.prodCiCd.toBoolean()
           }
         }
+      }
+    }
+  }
+
+  post {
+    success {
+      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+        sh '''
+          set +x
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $TOKEN" \
+            -X POST \
+            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+        '''
+      }
+    }
+
+    failure {
+      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+        sh '''
+          set +x
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $TOKEN" \
+            -X POST \
+            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+        '''
       }
     }
   }
