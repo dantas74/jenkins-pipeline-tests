@@ -83,7 +83,7 @@ pipeline {
     always {
       withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
         script {
-          githubStatus = GITHUB_STATUS_MAP[currentBuild.currentResult]
+          env.githubStatus = GITHUB_STATUS_MAP[currentBuild.currentResult]
         }
 
         sh '''
