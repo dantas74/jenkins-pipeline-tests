@@ -39,7 +39,9 @@ pipeline {
     }
 
     stage('Debug') {
-      echo GIT_URL
+      steps {
+        echo GIT_URL
+      }
     }
 
     /*stage('Cleaning old dependencies and cache') {
