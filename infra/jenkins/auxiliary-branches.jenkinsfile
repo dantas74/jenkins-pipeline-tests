@@ -51,7 +51,7 @@ pipeline {
       }
     }
 
-    /*stage('Cleaning old dependencies and cache') {
+    stage('Cleaning old dependencies and cache') {
       steps {
         sh 'composer clearcache'
         sh 'rm -rf vendor/*'
@@ -76,7 +76,7 @@ pipeline {
       steps {
         sh './vendor/bin/phpunit'
       }
-    }*/
+    }
   }
 
   post {
@@ -93,37 +93,9 @@ pipeline {
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $TOKEN" \
             -X POST \
-            -d '{"state": "'"$githubStatus"'", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+            -d '{"state": "'"$githubStatus"'", "context": "CI - Merging branches", "description": "Testing if the merging of the branches will pass in continuous integration", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
         '''
       }
     }
-
-    /*success {
-      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          set +x
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token $TOKEN" \
-            -X POST \
-            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
-        '''
-      }
-    }
-
-    failure {
-      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          set +x
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token $TOKEN" \
-            -X POST \
-            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
-        '''
-      }
-    }*/
   }
 }

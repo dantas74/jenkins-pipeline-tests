@@ -27,7 +27,7 @@ pipeline {
         [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
-      token: webhookTriggerToken
+      token: env.webhookTriggerToken
     )
   }
 
@@ -94,7 +94,7 @@ pipeline {
 
     stage('Auxiliary branch') {
       steps {
-        build job: "$projectName/ci-auxiliary",
+        build job: "${env.projectName}/ci-auxiliary",
           parameters: [string(name: 'branchName', value: headRef)],
           wait: false,
           propagate: false
@@ -109,7 +109,7 @@ pipeline {
 
     stage('Dev Environment') {
       steps {
-        build job: "$projectName/ci-dev",
+        build job: "${env.projectName}/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
@@ -125,7 +125,7 @@ pipeline {
     stage('Qa Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
-        build job: "$projectName/ci-dev",
+        build job: "${env.projectName}/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
@@ -141,7 +141,7 @@ pipeline {
     stage('Prod Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
-        build job: "$projectName/ci-dev",
+        build job: "${env.projectName}/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
