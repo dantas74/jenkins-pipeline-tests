@@ -1,8 +1,15 @@
 pipeline {
   agent any
-  
+
   environment {
-    PROJECT_NAME = 'proesc-backend'
+    // Name of the folder containing the jobs
+    projectName = 'proesc-backend'
+
+    // Token to make webhooks to this job
+    webhookTriggerToken = 'proesc-backend'
+
+    // Name of the credentials id to connect to git
+    sshKey = 'proesc-ssh-key'
   }
 
   options {
@@ -20,7 +27,7 @@ pipeline {
         [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
-      token: 'proesc-backend'
+      token: webhookTriggerToken
     )
   }
 
@@ -40,7 +47,7 @@ pipeline {
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+          userRemoteConfigs: [[credentialsId: sshKey, url: GIT_URL]]
         ])
       }
     }
@@ -87,7 +94,7 @@ pipeline {
 
     stage('Auxiliary branch') {
       steps {
-        build job: 'proesc-backend/ci-auxiliary',
+        build job: "$projectName/ci-auxiliary",
           parameters: [string(name: 'branchName', value: headRef)],
           wait: false,
           propagate: false
@@ -102,7 +109,7 @@ pipeline {
 
     stage('Dev Environment') {
       steps {
-        build job: 'proesc-backend/ci-dev',
+        build job: "$projectName/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
@@ -118,7 +125,7 @@ pipeline {
     stage('Qa Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
-        build job: 'proesc-backend/ci-dev',
+        build job: "$projectName/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
@@ -134,7 +141,7 @@ pipeline {
     stage('Prod Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
-        build job: 'proesc-backend/ci-dev',
+        build job: "$projectName/ci-dev",
           parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
           wait: false,
           propagate: false
@@ -146,36 +153,6 @@ pipeline {
             return env.prodCiCd.toBoolean()
           }
         }
-      }
-    }
-  }
-
-  post {
-    success {
-      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          set +x
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token $TOKEN" \
-            -X POST \
-            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
-        '''
-      }
-    }
-
-    failure {
-      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
-        sh '''
-          set +x
-          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token $TOKEN" \
-            -X POST \
-            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
-        '''
       }
     }
   }

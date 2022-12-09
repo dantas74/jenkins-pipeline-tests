@@ -24,9 +24,30 @@ pipeline {
       }
     }
 
-    stage('Testing CI for dev branch') {
+    stage('Cleaning old dependencies and cache') {
       steps {
-        echo 'Hello world'
+        sh 'composer clearcache'
+        sh 'rm -rf vendor/*'
+      }
+    }
+
+    stage('Installing dependencies') {
+      steps {
+        sh 'composer install'
+      }
+    }
+
+    stage('Building image with docker') {
+      steps {
+        script {
+          dockerImage = docker.build(".")
+        }
+      }
+    }
+
+    stage('Testing project') {
+      steps {
+        sh './vendor/bin/phpunit'
       }
     }
 

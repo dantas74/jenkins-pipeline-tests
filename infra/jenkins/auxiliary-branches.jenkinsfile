@@ -1,0 +1,129 @@
+def GITHUB_STATUS_MAP = [
+  'SUCCESS': 'success',
+  'FAILURE': 'failure',
+]
+
+pipeline {
+  agent any
+
+  environment {
+    // Name of the folder containing the jobs
+    projectName = 'proesc-backend'
+
+    // Name of the credentials id to connect to git
+    sshKey = 'proesc-ssh-key'
+  }
+
+  options {
+    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+    disableConcurrentBuilds()
+  }
+
+  parameters {
+    string(name: 'branchName', defaultValue: '')
+  }
+
+  stages {
+    stage('Checkout SCM') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: "*/develop"]],
+          extensions: [[$class: 'CleanCheckout']],
+          doGenerateSubmoduleConfigurations: false,
+          submoduleCfg: [],
+          userRemoteConfigs: [[credentialsId: sshKey, url: GIT_URL]]
+        ])
+      }
+    }
+
+    stage('Merging branch into develop') {
+      steps {
+        // This is made to get these repositories in local
+        sh "git checkout ${params.branchName} && git checkout develop"
+
+        // This is made to delete last merge-branch of previous result
+        sh 'git branch | grep merge-branch > ./tmp.txt; if [[ "$(< ./tmp.txt)" == "  merge-branch" ]]; then git branch -d merge-branch; fi; rm -rf ./tmp.txt'
+
+        // This creates a new version simulating the dev branch with changes proposed in PR
+        sh 'git checkout -b merge-branch'
+        sh "git merge ${params.branchName}"
+      }
+    }
+
+    /*stage('Cleaning old dependencies and cache') {
+      steps {
+        sh 'composer clearcache'
+        sh 'rm -rf vendor/*'
+      }
+    }
+
+    stage('Installing dependencies') {
+      steps {
+        sh 'composer install'
+      }
+    }
+
+    stage('Building image with docker') {
+      steps {
+        script {
+          dockerImage = docker.build(".")
+        }
+      }
+    }
+
+    stage('Testing project') {
+      steps {
+        sh './vendor/bin/phpunit'
+      }
+    }*/
+  }
+
+  post {
+    always {
+      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+        script {
+          githubStatus = GITHUB_STATUS_MAP[currentBuild.currentResult]
+        }
+
+        sh '''
+          set +x
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $TOKEN" \
+            -X POST \
+            -d '{"state": "'"$githubStatus"'", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+        '''
+      }
+    }
+
+    /*success {
+      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+        sh '''
+          set +x
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $TOKEN" \
+            -X POST \
+            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+        '''
+      }
+    }
+
+    failure {
+      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+        sh '''
+          set +x
+          curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token $TOKEN" \
+            -X POST \
+            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+        '''
+      }
+    }*/
+  }
+}
