@@ -150,6 +150,7 @@ pipeline {
     success {
       sh '''
         set +x
+        echo "$TOKEN"
         curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT?access_token=$TOKEN" \
           -H "Content-Type: application/json" \
           -X POST \
@@ -160,6 +161,7 @@ pipeline {
     failure {
       sh '''
         set +x
+        echo "$TOKEN"
         curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT?access_token=$TOKEN" \
           -H "Content-Type: application/json" \
           -X POST \
