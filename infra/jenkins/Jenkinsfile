@@ -147,7 +147,7 @@ pipeline {
   }
 
   post {
-    sucess {
+    success {
       withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
         sh """
           curl "https://api.GitHub.com/repos/matheus-dr/test-multibranch/statuses/$GIT_COMMIT?access_token=$TOKEN" \
