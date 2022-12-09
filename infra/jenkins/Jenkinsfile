@@ -1,5 +1,9 @@
 pipeline {
   agent any
+  
+  environment {
+    PROJECT_NAME = 'proesc-backend'
+  }
 
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
@@ -156,7 +160,7 @@ pipeline {
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $TOKEN" \
             -X POST \
-            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$JOB_BASE_NAME/job/controller/$BUILD_NUMBER/console"'"}'
+            -d '{"state": "success", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
         '''
       }
     }
@@ -170,7 +174,7 @@ pipeline {
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $TOKEN" \
             -X POST \
-            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$JOB_BASE_NAME/job/controller/$BUILD_NUMBER/console"'"}'
+            -d '{"state": "failure", "context": "continuous-integration/jenkins", "description": "Jenkins", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
         '''
       }
     }
