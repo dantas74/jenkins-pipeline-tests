@@ -37,8 +37,8 @@ pipeline {
         script {
           env.branchName = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
           env.suffix = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
-          env.clusterName = params.projectName + '-CLU-' + environment.suffix
-          env.serviceName = params.projectName + '-SRV-' + environment.suffix
+          env.clusterName = params.projectName + '-CLU-' + env.suffix
+          env.serviceName = params.projectName + '-SRV-' + env.suffix
         }
       }
     }
