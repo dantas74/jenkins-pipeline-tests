@@ -27,7 +27,7 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.environment = ENVIRONMENT_MAP[params.environment]
+          env.environment = ENVIRONMENT_MAP[params.environmentParam]
         }
       }
     }

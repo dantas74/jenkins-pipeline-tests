@@ -30,7 +30,7 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.environment = ENVIRONMENT_MAP[params.environment]
+          env.environment = ENVIRONMENT_MAP[params.environmentParam]
           env.clusterName = params.projectName + '-CLU-' + environment.suffix
           env.serviceName = params.projectName + '-SRV-' + environment.suffix
         }
