@@ -80,7 +80,9 @@ pipeline {
     }*/
 
     stage('Debug') {
-      echo 'It is working as well :)'
+      steps {
+        echo 'It is working as well :)'
+      }
     }
   }
 
