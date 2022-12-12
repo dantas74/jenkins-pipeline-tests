@@ -32,6 +32,18 @@ pipeline {
       }
     }
 
+    stage('Debug') {
+      steps {
+        echo env.environment
+      }
+    }
+
+    stage('Debug') {
+      steps {
+        echo env.environment.branch
+      }
+    }
+
     stage('Checkout SCM') {
       steps {
         checkout([
