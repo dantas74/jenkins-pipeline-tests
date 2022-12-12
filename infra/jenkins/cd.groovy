@@ -21,18 +21,22 @@ pipeline {
     string(name: 'awsRegion', defaultValue: '')
   }
 
-  environment {
-    environment = ENVIRONMENT_MAP[params.environment]
-    clusterName = params.projectName + '-CLU-' + environment.suffix
-    serviceName = params.projectName + '-SRV-' + environment.suffix
-  }
-
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
   }
 
   stages {
+    stage('Setup') {
+      steps {
+        script {
+          env.environment = ENVIRONMENT_MAP[params.environment]
+          env.clusterName = params.projectName + '-CLU-' + environment.suffix
+          env.serviceName = params.projectName + '-SRV-' + environment.suffix
+        }
+      }
+    }
+
     stage('Checkout SCM') {
       steps {
         checkout([

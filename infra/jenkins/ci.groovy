@@ -18,16 +18,20 @@ pipeline {
     string(name: 'awsRegion', defaultValue: '')
   }
 
-  environment {
-    environment = ENVIRONMENT_MAP[params.environment]
-  }
-
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
   }
 
   stages {
+    stage('Setup') {
+      steps {
+        script {
+          env.environment = ENVIRONMENT_MAP[params.environment]
+        }
+      }
+    }
+
     stage('Checkout SCM') {
       steps {
         checkout([
