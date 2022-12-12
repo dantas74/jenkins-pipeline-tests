@@ -35,8 +35,8 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.branchName = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
-          env.suffix = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
+          env.branchName = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
+          env.suffix = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
           env.clusterName = params.projectName + '-CLU-' + environment.suffix
           env.serviceName = params.projectName + '-SRV-' + environment.suffix
         }
@@ -47,7 +47,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.branch]],
+          branches: [[name: env.branchName]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
