@@ -1,0 +1,78 @@
+${jsonencode([
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/proesc-backend-TD",
+          "awslogs-region": "sa-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "protocol": "tcp",
+          "containerPort": 80
+        }
+      ],
+      "mountPoints": [
+        {
+          "readOnly": null,
+          "containerPath": "/var/www/html",
+          "sourceVolume": "app-VOL"
+        }
+      ],
+      "image": "${ECR_URI}",
+      "essential": true,
+      "name": "app"
+    },
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/proesc-backend-TD",
+          "awslogs-region": "sa-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 9000,
+          "protocol": "tcp",
+          "containerPort": 9000
+        }
+      ],
+      "environment": [
+        {
+          "name": "APP_DEBUG",
+          "value": "false"
+        },
+        {
+          "name": "APP_ENV",
+          "value": "production"
+        },
+        {
+          "name": "APP_KEY",
+          "value": "${APP_KEY}"
+        },
+        {
+          "name": "APP_NAME",
+          "value": "Proesc backend"
+        },
+        {
+          "name": "APP_URL",
+          "value": "http://localhost"
+        }
+      ],
+      "volumesFrom": [
+        {
+          "sourceContainer": "app",
+          "readOnly": null
+        }
+      ],
+      "image": "php:8.1-fpm",
+      "essential": true,
+      "name": "php"
+    }
+  ]
+)}
