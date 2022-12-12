@@ -38,7 +38,7 @@ pipeline {
           $class: 'GitSCM',
           branches: [
             [name: '*/develop'],
-            [name: '*/release*'],
+            [name: '*/release'],
             [name: '*/main'],
             [name: '*/feature*'],
             [name: '*/hotfix*'],
@@ -79,8 +79,8 @@ pipeline {
 
           // Validation of qa environment
           env.qaCiCd = (
-            baseRef ==~ /release.*$/ && env.isGoingToDeploy.toBoolean()
-          ) || (pushRef ==~ /refs\/heads\/release.*$/)
+            baseRef ==~ 'release' && env.isGoingToDeploy.toBoolean()
+          ) || (pushRef ==~ 'refs/heads/release')
 
           // Validation of prod environment
           env.prodCiCd = (
@@ -148,10 +148,8 @@ pipeline {
       }
 
       when {
-        anyOf {
-          expression {
-            return env.prodCiCd.toBoolean()
-          }
+        expression {
+          return env.prodCiCd.toBoolean()
         }
       }
     }

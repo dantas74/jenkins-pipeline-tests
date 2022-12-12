@@ -1,6 +1,17 @@
 pipeline {
   agent any
 
+  environment {
+    // Name of the folder containing the jobs
+    projectName = 'proesc-backend'
+
+    // Name of the credentials id to connect to git
+    sshKey = 'proesc-ssh-key'
+
+    // App registry in ECR
+    appRegistry = '607751015014.dkr.ecr.sa-east-1.amazonaws.com/proesc-backend'
+  }
+
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
@@ -19,7 +30,7 @@ pipeline {
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+          userRemoteConfigs: [[credentialsId: sshKey, url: GIT_URL]]
         ])
       }
     }
@@ -39,9 +50,7 @@ pipeline {
 
     stage('Building image with docker') {
       steps {
-        script {
-          dockerImage = docker.build(".")
-        }
+        sh "docker build -t ${env.appRegistry}:dev-latest ."
       }
     }
 
@@ -53,7 +62,7 @@ pipeline {
 
     stage('Enable CD') {
       steps {
-        build job: 'proesc-backend/cd-dev',
+        build job: "${env.projectName}/cd-dev",
           wait: false,
           propagate: false
       }

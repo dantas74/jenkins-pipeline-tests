@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         registryCredential = 'ecr:sa-east-1:aws-CRED'
-        appRegistry = '607751015014.dkr.ecr.sa-east-1.amazonaws.com/proesc-backend-REPO'
+        appRegistry = '607751015014.dkr.ecr.sa-east-1.amazonaws.com/proesc-backend'
         backendRegistryUrl = 'https://607751015014.dkr.ecr.sa-east-1.amazonaws.com'
         cluster = 'proesc-backend-CLU'
         service = 'proesc-backend-SRV'

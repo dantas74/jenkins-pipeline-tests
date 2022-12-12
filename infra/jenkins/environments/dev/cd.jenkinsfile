@@ -1,5 +1,36 @@
+def COLOR_MAP = [
+    'SUCCESS': 'success',
+    'FAILURE': 'failure',
+]
+
 pipeline {
   agent any
+
+  environment {
+    // Name of the folder containing the jobs
+    projectName = 'proesc-backend'
+
+    // Name of the credentials id to connect to git
+    sshKey = 'proesc-ssh-key'
+
+    // ECR registry url
+    backendRegistryUrl = 'https://607751015014.dkr.ecr.sa-east-1.amazonaws.com'
+
+    // Cluster name in AWS
+    cluster = 'proesc-backend-CLU'
+
+    // Service name in AWS
+    service = 'proesc-backend-SRV'
+
+    // Access way of docker plugin for AWS
+    registryCredential = 'ecr:sa-east-1:aws-CRED'
+
+    // Name of credentials id to connect to AWS
+    awsCredentials = 'aws-CRED'
+
+    // AWS Region
+    awsRegion = 'sa-east-1'
+  }
 
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
@@ -15,15 +46,41 @@ pipeline {
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: 'proesc-ssh-key', url: 'git@github.com:matheus-dr/test-multibranch.git']]
+          userRemoteConfigs: [[credentialsId: sshKey, url: GIT_URL]]
         ])
       }
     }
 
-    stage('Testing CD for') {
+    stage('Versioning project') {
       steps {
-        echo 'Testing Cd for project'
+        sh "docker tag ${env.appRegistry}:dev-latest ${env.appRegistry}:V-dev-${env.BUILD_ID}"
       }
+    }
+
+    stage('Publishing project to ECR') {
+      steps {
+        docker.withRegistry(appRegistryUrl, registryCredential) {
+          sh "docker push ${env.appRegistry}:V-dev-${env.BUILD_ID}"
+          sh "docker push ${env.appRegistry}:dev-latest"
+        }
+      }
+    }
+
+    stage('Deploy app to ECS') {
+      steps {
+        withAWS(credentials: awsCredentials, region: awsRegion) {
+          sh "aws ecs update-service --cluster ${env.cluster}-dev --service ${env.service}-dev --force-new-deployment"
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      echo 'Slack notifications.'
+      slackSend channel: '#dev',
+        color: COLOR_MAP[currentBuild.currentResult],
+        message: "*${currentBuild.currentResult}:* Job: ${env.JOB_NAME} build: ${env.BUILD_ID}\nMore info at: ${env.BUILD_URL}"
     }
   }
 }

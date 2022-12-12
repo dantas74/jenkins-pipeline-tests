@@ -12,6 +12,9 @@ pipeline {
 
     // Name of the credentials id to connect to git
     sshKey = 'proesc-ssh-key'
+
+    // Github webhook credential token
+    githubWebhookToken = 'github-token-matheus-dr'
   }
 
   options {
@@ -81,7 +84,7 @@ pipeline {
 
   post {
     always {
-      withCredentials([string(credentialsId: 'github-token-matheus-dr', variable: 'TOKEN')]) {
+      withCredentials([string(credentialsId: githubWebhookToken, variable: 'TOKEN')]) {
         script {
           env.githubStatus = GITHUB_STATUS_MAP[currentBuild.currentResult]
         }
@@ -93,7 +96,7 @@ pipeline {
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $TOKEN" \
             -X POST \
-            -d '{"state": "'"$githubStatus"'", "context": "CI - Merging branches", "description": "Testing if the merging of the branches will pass in continuous integration", "target_url": "'"$JENKINS_URL/job/$PROJECT_NAME/job/$JOB_BASE_NAME/$BUILD_NUMBER/console"'"}'
+            -d '{"state": "'"$githubStatus"'", "context": "CI - Merging branches", "description": "Testing if the merging of the branches will pass in continuous integration", "target_url": "'"$BUILD_URL"'"}'
         '''
       }
     }
