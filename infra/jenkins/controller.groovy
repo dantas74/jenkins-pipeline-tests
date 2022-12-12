@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     projectName = 'proesc-backend' // Name of the folder containing the jobs
-    webhookTriggerToken = 'proesc-backend' // Token to make webhooks to this job
     sshKey = 'proesc-ssh-key' // Name of the credentials id to connect to git
     githubWebhookToken = 'github-token-matheus-dr' // Github webhook credential token
     appRegistry = '607751015014.dkr.ecr.sa-east-1.amazonaws.com/proesc-backend' // App registry in ECR
@@ -28,7 +27,8 @@ pipeline {
         [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
-      token: "${env.webhookTriggerToken}"
+      // Always change for each project
+      token: 'proesc-backend'
     )
   }
 
