@@ -17,6 +17,10 @@ pipeline {
     string(name: 'sshKey', defaultValue: '')
     string(name: 'appRegistry', defaultValue: '')
     choice(name: 'environmentParam', choices: ['Development', 'Production'])
+    string(name: 'appRegistryUrl', defaultValue: '')
+    string(name: 'ecrRegistryCredential', defaultValue: '')
+    string(name: 'awsCredentials', defaultValue: '')
+    string(name: 'awsRegion', defaultValue: '')
   }
 
   environment {
@@ -70,7 +74,7 @@ pipeline {
             string(name: 'sshKey', value: params.sshKey),
             string(name: 'projectName', value: params.projectName),
             string(name: 'environmentParam', value: params.environmentParam),
-            string(name: 'registryUrl', value: params.registryUrl),
+            string(name: 'appRegistryUrl', value: params.appRegistryUrl),
             string(name: 'ecrRegistryCredential', value: params.ecrRegistryCredential),
             string(name: 'awsCredentials', value: params.awsCredentials),
             string(name: 'awsRegion', value: params.awsRegion)

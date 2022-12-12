@@ -15,7 +15,7 @@ pipeline {
     string(name: 'sshKey', defaultValue: '')
     string(name: 'projectName', defaultValue: '')
     string(name: 'environmentParam', defaultValue: '')
-    string(name: 'backendRegistryUrl', defaultValue: '')
+    string(name: 'appRegistryUrl', defaultValue: '')
     string(name: 'ecrRegistryCredential', defaultValue: '')
     string(name: 'awsCredentials', defaultValue: '')
     string(name: 'awsRegion', defaultValue: '')
