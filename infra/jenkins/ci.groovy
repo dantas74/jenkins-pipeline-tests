@@ -32,7 +32,7 @@ pipeline {
       }
     }
 
-    stage('Debug') {
+    stage('Debug1') {
       steps {
         echo env.environment
       }
