@@ -28,7 +28,7 @@ pipeline {
         [key: 'isMergeable', value: '$.pull_request.mergeable', defaultValue: ''],
         [key: 'mergeAction', value: '$.action', defaultValue: '']
       ],
-      token: webhookTriggerToken
+      token: "${env.webhookTriggerToken}"
     )
   }
 
