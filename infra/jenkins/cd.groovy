@@ -3,9 +3,9 @@ def COLOR_MAP = [
     'FAILURE': 'failure',
 ]
 
-def ENVIRONMENT_MAP = [
-  'Development' = [ suffix: 'dev', branch: '*/develop' ]
-  'Production' = [ suffix: 'prod', branch: '*/main' ]
+Map ENVIRONMENT_MAP = [
+  'Development': [ suffix: 'dev', branch: '*/develop' ]
+  'Production': [ suffix: 'prod', branch: '*/main' ]
 ]
 
 pipeline {
@@ -46,7 +46,7 @@ pipeline {
       }
     }
 
-    stage('Versioning project') {
+    /*stage('Versioning project') {
       steps {
         sh "docker tag ${params.appRegistry}:${env.environment.suffix}-latest ${params.appRegistry}:V-${env.environment.suffix}-${env.BUILD_ID}"
       }
@@ -67,15 +67,19 @@ pipeline {
           sh "aws ecs update-service --cluster ${env.clusterName} --service ${env.serviceName} --force-new-deployment"
         }
       }
+    }*/
+
+    stage('Debug') {
+      echo 'It is working as well :)'
     }
   }
 
-  post {
+  /*post {
     always {
       echo 'Slack notifications.'
       slackSend channel: '#dev',
         color: COLOR_MAP[currentBuild.currentResult],
         message: "*${currentBuild.currentResult}:* Job: ${env.JOB_NAME} build: ${env.BUILD_ID}\nMore info at: ${env.BUILD_URL}"
     }
-  }
+  }*/
 }

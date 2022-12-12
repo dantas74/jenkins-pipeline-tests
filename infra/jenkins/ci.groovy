@@ -1,15 +1,10 @@
-def ENVIRONMENT_MAP = [
-  'Development' = [ suffix: 'dev', branch: '*/develop' ]
-  'Production' = [ suffix: 'prod', branch: '*/main' ]
+Map ENVIRONMENT_MAP = [
+  'Development': [ suffix: 'dev', branch: '*/develop' ]
+  'Production': [ suffix: 'prod', branch: '*/main' ]
 ]
 
 pipeline {
   agent any
-
-  options {
-    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
-    disableConcurrentBuilds()
-  }
 
   parameters {
     booleanParam(name: 'isGoingToDeploy', defaultValue: false)
@@ -27,12 +22,17 @@ pipeline {
     environment = ENVIRONMENT_MAP[params.environment]
   }
 
+  options {
+    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+    disableConcurrentBuilds()
+  }
+
   stages {
     stage('Checkout SCM') {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: environment.branch]],
+          branches: [[name: env.environment.branch]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -41,7 +41,7 @@ pipeline {
       }
     }
 
-    stage('Cleaning old dependencies and cache') {
+    /*stage('Cleaning old dependencies and cache') {
       steps {
         sh 'composer clearcache'
         sh 'rm -rf vendor/*'
@@ -63,6 +63,12 @@ pipeline {
     stage('Testing project') {
       steps {
         sh './vendor/bin/phpunit'
+      }
+    }*/
+
+    stage('Debug') {
+      steps {
+        echo 'It is working :)'
       }
     }
 
