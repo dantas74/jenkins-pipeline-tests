@@ -30,7 +30,9 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.environment = ENVIRONMENT_MAP[params.environmentParam]
+          environment = ENVIRONMENT_MAP[params.environmentParam]
+          env.branchName = environment.branch
+          env.suffix = environment.suffix
           env.clusterName = params.projectName + '-CLU-' + environment.suffix
           env.serviceName = params.projectName + '-SRV-' + environment.suffix
         }
@@ -41,7 +43,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.environment['branch']]],
+          branches: [[name: env.branch]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -52,15 +54,15 @@ pipeline {
 
     /*stage('Versioning project') {
       steps {
-        sh "docker tag ${params.appRegistry}:${env.environment.suffix}-latest ${params.appRegistry}:V-${env.environment.suffix}-${env.BUILD_ID}"
+        sh "docker tag ${params.appRegistry}:${env.suffix}-latest ${params.appRegistry}:V-${env.suffix}-${env.BUILD_ID}"
       }
     }
 
     stage('Publishing project to ECR') {
       steps {
         docker.withRegistry(appRegistryUrl, ecrRegistryCredential) {
-          sh "docker push ${params.appRegistry}:V-${env.environment.suffix}-${env.BUILD_ID}"
-          sh "docker push ${params.appRegistry}:${env.environment.suffix}-latest"
+          sh "docker push ${params.appRegistry}:V-${env.suffix}-${env.BUILD_ID}"
+          sh "docker push ${params.appRegistry}:${env.suffix}-latest"
         }
       }
     }

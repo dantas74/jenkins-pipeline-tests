@@ -27,14 +27,10 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.environment = ENVIRONMENT_MAP[params.environmentParam]
+          environment = ENVIRONMENT_MAP[params.environmentParam]
+          env.branchName = environment.branch
+          env.suffix = environment.suffix
         }
-      }
-    }
-
-    stage('Debug2') {
-      steps {
-        echo env.environment['branch']
       }
     }
 
@@ -42,7 +38,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.environment['branch']]],
+          branches: [[name: env.branch]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -66,7 +62,7 @@ pipeline {
 
     stage('Building image with docker') {
       steps {
-        sh "docker build -t ${params.appRegistry}:latest-${env.environment.suffix} ."
+        sh "docker build -t ${params.appRegistry}:latest-${env.suffix} ."
       }
     }
 
