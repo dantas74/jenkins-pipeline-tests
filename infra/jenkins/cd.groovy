@@ -3,9 +3,14 @@ def COLOR_MAP = [
     'FAILURE': 'failure',
 ]
 
-Map ENVIRONMENT_MAP = [
-  'Development': [ suffix: 'dev', branch: '*/develop' ],
-  'Production': [ suffix: 'prod', branch: '*/main' ],
+def ENVIRONMENT_SUFFIX_MAP = [
+  'Development': 'dev',
+  'Production': 'prod',
+]
+
+def ENVIRONMENT_BRANCH_MAP = [
+  'Development': '*/develop',
+  'Production': '*/main',
 ]
 
 pipeline {
@@ -30,9 +35,8 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          environment = ENVIRONMENT_MAP[params.environmentParam]
-          env.branchName = environment.branch
-          env.suffix = environment.suffix
+          env.branchName = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
+          env.suffix = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
           env.clusterName = params.projectName + '-CLU-' + environment.suffix
           env.serviceName = params.projectName + '-SRV-' + environment.suffix
         }
