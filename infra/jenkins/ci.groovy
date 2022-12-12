@@ -38,7 +38,7 @@ pipeline {
       }
     }
 
-    stage('Debug') {
+    stage('Debug2') {
       steps {
         echo env.environment.branch
       }
