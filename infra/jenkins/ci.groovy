@@ -1,6 +1,6 @@
 Map ENVIRONMENT_MAP = [
-  'Development': [ suffix: 'dev', branch: '*/develop' ]
-  'Production': [ suffix: 'prod', branch: '*/main' ]
+  'Development': [ suffix: 'dev', branch: '*/develop' ],
+  'Production': [ suffix: 'prod', branch: '*/main' ],
 ]
 
 pipeline {
