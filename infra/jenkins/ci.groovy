@@ -32,15 +32,9 @@ pipeline {
       }
     }
 
-    stage('Debug1') {
-      steps {
-        echo env.environment
-      }
-    }
-
     stage('Debug2') {
       steps {
-        echo env.environment.branch
+        echo env.environment['branch']
       }
     }
 
@@ -48,7 +42,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.environment.branch]],
+          branches: [[name: env.environment['branch']]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
