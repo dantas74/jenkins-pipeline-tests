@@ -6,17 +6,6 @@ def GITHUB_STATUS_MAP = [
 pipeline {
   agent any
 
-  environment {
-    // Name of the folder containing the jobs
-    projectName = 'proesc-backend'
-
-    // Name of the credentials id to connect to git
-    sshKey = 'proesc-ssh-key'
-
-    // Github webhook credential token
-    githubWebhookToken = 'github-token-matheus-dr'
-  }
-
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
     disableConcurrentBuilds()
@@ -24,6 +13,9 @@ pipeline {
 
   parameters {
     string(name: 'branchName', defaultValue: '')
+    string(name: 'projectName', defaultValue: '')
+    string(name: 'sshKey', defaultValue: '')
+    string(name: 'githubWebhookToken', defaultValue: '')
   }
 
   stages {
@@ -35,7 +27,7 @@ pipeline {
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
-          userRemoteConfigs: [[credentialsId: sshKey, url: GIT_URL]]
+          userRemoteConfigs: [[credentialsId: params.sshKey, url: GIT_URL]]
         ])
       }
     }
@@ -69,9 +61,7 @@ pipeline {
 
     stage('Building image with docker') {
       steps {
-        script {
-          dockerImage = docker.build(".")
-        }
+        sh 'docker build .'
       }
     }
 
@@ -84,7 +74,7 @@ pipeline {
 
   post {
     always {
-      withCredentials([string(credentialsId: githubWebhookToken, variable: 'TOKEN')]) {
+      withCredentials([string(credentialsId: params.githubWebhookToken, variable: 'TOKEN')]) {
         script {
           env.githubStatus = GITHUB_STATUS_MAP[currentBuild.currentResult]
         }
@@ -96,7 +86,7 @@ pipeline {
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token $TOKEN" \
             -X POST \
-            -d '{"state": "'"$githubStatus"'", "context": "CI - Merging branches", "description": "Testing if the merging of the branches will pass in continuous integration", "target_url": "'"$BUILD_URL"'"}'
+            -d '{"state": "'"$githubStatus"'", "context": "CI - Merging branches", "description": "Testing if the merging of the branches will pass in continuous integration", "target_url": "'"$BUILD_URL"'console"}'
         '''
       }
     }

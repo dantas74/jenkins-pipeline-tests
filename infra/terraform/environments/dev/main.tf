@@ -1,7 +1,7 @@
 terraform {
   /*backend "s3" {
     bucket = "infra-state"
-    key = "proesc-backend/first-state.tfstate"
+    key = "proesc-backend/dev-state.tfstate"
     region = "sa-east-1"
   }*/
 

@@ -2,14 +2,15 @@ pipeline {
   agent any
 
   environment {
-    // Name of the folder containing the jobs
-    projectName = 'proesc-backend'
-
-    // Token to make webhooks to this job
-    webhookTriggerToken = 'proesc-backend'
-
-    // Name of the credentials id to connect to git
-    sshKey = 'proesc-ssh-key'
+    projectName = 'proesc-backend' // Name of the folder containing the jobs
+    webhookTriggerToken = 'proesc-backend' // Token to make webhooks to this job
+    sshKey = 'proesc-ssh-key' // Name of the credentials id to connect to git
+    githubWebhookToken = 'github-token-matheus-dr' // Github webhook credential token
+    appRegistry = '607751015014.dkr.ecr.sa-east-1.amazonaws.com/proesc-backend' // App registry in ECR
+    registryUrl = 'https://607751015014.dkr.ecr.sa-east-1.amazonaws.com' // ECR registry url
+    ecrRegistryCredential = 'ecr:sa-east-1:aws-CRED' // Access way of docker plugin for AWS
+    awsCredentials = 'aws-CRED' // Name of credentials id to connect to AWS
+    awsRegion = 'sa-east-1' // AWS Region
   }
 
   options {
@@ -95,7 +96,12 @@ pipeline {
     stage('Auxiliary branch') {
       steps {
         build job: "${env.projectName}/ci-auxiliary",
-          parameters: [string(name: 'branchName', value: headRef)],
+          parameters: [
+            string(name: 'branchName', value: headRef),
+            string(name: 'projectName', value: projectName),
+            string(name: 'sshKey', value: sshKey),
+            string(name: 'githubWebhookToken', value: githubWebhookToken)
+          ],
           wait: false,
           propagate: false
       }
@@ -109,8 +115,18 @@ pipeline {
 
     stage('Dev Environment') {
       steps {
-        build job: "${env.projectName}/ci-dev",
-          parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
+        build job: "${env.projectName}/ci",
+          parameters: [
+            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy),
+            string(name: 'projectName', value: projectName),
+            string(name: 'sshKey', value: sshKey),
+            string(name: 'appRegistry', value: appRegistry),
+            string(name: 'environmentParam', value: 'Development'),
+            string(name: 'registryUrl', value: registryUrl),
+            string(name: 'ecrRegistryCredential', value: ecrRegistryCredential),
+            string(name: 'awsCredentials', value: awsCredentials),
+            string(name: 'awsRegion', value: awsRegion)
+          ],
           wait: false,
           propagate: false
       }
@@ -122,11 +138,13 @@ pipeline {
       }
     }
 
-    stage('Qa Environment') {
+    /*stage('Qa Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
         build job: "${env.projectName}/ci-dev",
-          parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
+          parameters: [
+            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)
+          ],
           wait: false,
           propagate: false
       }
@@ -136,13 +154,15 @@ pipeline {
           return env.qaCiCd.toBoolean()
         }
       }
-    }
+    }*/
 
-    stage('Prod Environment') {
+    /*stage('Prod Environment') {
       steps {
         // TODO: Change job to correct pipeline and environment
         build job: "${env.projectName}/ci-dev",
-          parameters: [booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)],
+          parameters: [
+            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)
+          ],
           wait: false,
           propagate: false
       }
@@ -152,6 +172,6 @@ pipeline {
           return env.prodCiCd.toBoolean()
         }
       }
-    }
+    }*/
   }
 }
