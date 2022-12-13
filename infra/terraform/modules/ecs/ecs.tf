@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "proesc_backend_TD" {
   network_mode             = "awsvpc"
 
   container_definitions = templatefile(local.container_definitions_path, {
-    ECR_URI = var.ECR_URI
+    ECR_URI = local.environment_ecr_uri
     APP_KEY = var.APP_KEY
   })
 

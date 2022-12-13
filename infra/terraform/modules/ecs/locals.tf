@@ -7,6 +7,7 @@ locals {
   cluster_name           = "proesc-backend-CLU-${local.stage_suffix}"
   task_definition_family = "proesc-backend-TD-${local.stage_suffix}"
   service_name           = "proesc-backend-SRV-${local.stage_suffix}"
+  environment_ecr_uri = "${var.ECR_URI}:${local.stage_suffix}-latest"
 
   container_definitions_path = "${path.module}/templates/container-definitions.tftpl"
 

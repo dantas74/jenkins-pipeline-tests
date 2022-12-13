@@ -1,11 +1,6 @@
-def ENVIRONMENT_SUFFIX_MAP = [
-  'Development': 'dev',
-  'Production': 'prod',
-]
-
-def ENVIRONMENT_BRANCH_MAP = [
-  'Development': '*/develop',
-  'Production': '*/main',
+def ENVIRONMENT_MAP = [
+  'Development': '*/develop;dev'
+  'Production': '*/main;prod'
 ]
 
 pipeline {
@@ -32,8 +27,10 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.branchName = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
-          env.suffix = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
+          def vars = ENVIRONMENT_MAP[params.environmentParam].split(';')
+
+          env.branchName = vars[0]
+          env.suffix = vars[1]
         }
       }
     }
@@ -66,7 +63,7 @@ pipeline {
 
     stage('Building image with docker') {
       steps {
-        sh "docker build -t ${params.appRegistry}:latest-${env.suffix} ."
+        sh "docker build -t ${params.appRegistry}:${env.suffix}-latest ."
       }
     }
 

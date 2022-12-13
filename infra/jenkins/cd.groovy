@@ -1,16 +1,11 @@
+def ENVIRONMENT_MAP = [
+    'Development': 'proesc-backend-dev-env;./infra/terraform/environments/dev;*/develop;dev',
+    'Production': 'proesc-backend-prod-env;./infra/terraform/environments/prod;*/main;prod',
+]
+
 def COLOR_MAP = [
     'SUCCESS': 'success',
     'FAILURE': 'failure',
-]
-
-def ENVIRONMENT_SUFFIX_MAP = [
-  'Development': 'dev',
-  'Production': 'prod',
-]
-
-def ENVIRONMENT_BRANCH_MAP = [
-  'Development': '*/develop',
-  'Production': '*/main',
 ]
 
 pipeline {
@@ -35,10 +30,15 @@ pipeline {
     stage('Setup') {
       steps {
         script {
-          env.branchName = ENVIRONMENT_BRANCH_MAP[params.environmentParam]
-          env.suffix = ENVIRONMENT_SUFFIX_MAP[params.environmentParam]
-          env.clusterName = params.projectName + '-CLU-' + env.suffix
-          env.serviceName = params.projectName + '-SRV-' + env.suffix
+          def vars = ENVIRONMENT_MAP[params.environmentParam].split(';')
+
+          env.credentialsFile = vars[0]
+          env.terraformPath = vars[1]
+          env.branchName = vars[2]
+          env.suffix = vars[3]
+
+          env.clusterName = "${params.projectName}-CLU-${env.suffix}"
+          env.serviceName = "${params.projectName}-SRV-${env.suffix}"
         }
       }
     }
@@ -56,7 +56,16 @@ pipeline {
       }
     }
 
-    /*stage('Versioning project') {
+    /*stage('Update infra') {
+      steps {
+        withCredentials([file(credentialsId: env.credentialsFile, variable: 'FILE')]) {
+          sh 'use $FILE'
+          sh "terraform -chdir=${env.terraformPath} apply -auto-approve"
+        }
+      }
+    }
+
+    stage('Versioning project') {
       steps {
         sh "docker tag ${params.appRegistry}:${env.suffix}-latest ${params.appRegistry}:V-${env.suffix}-${env.BUILD_ID}"
       }
