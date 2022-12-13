@@ -1,6 +1,6 @@
 def ENVIRONMENT_MAP = [
-  'Development': '*/develop;dev'
-  'Production': '*/main;prod'
+  'Development': '*/develop;dev',
+  'Production': '*/main;prod',
 ]
 
 pipeline {
