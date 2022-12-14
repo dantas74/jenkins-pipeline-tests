@@ -16,14 +16,23 @@ pipeline {
     string(name: 'projectName', defaultValue: '')
     string(name: 'sshKey', defaultValue: '')
     string(name: 'githubWebhookToken', defaultValue: '')
+    string(name: 'baseRef', defaultValue: '')
   }
 
   stages {
+    stage('Setup') {
+      steps {
+        script {
+          env.checkoutBranch = params.baseRef == 'main' ? 'main' : 'develop'
+        }
+      }
+    }
+
     stage('Checkout SCM') {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: "*/develop"]],
+          branches: [[name: "*/${env.checkoutBranch}"]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -32,10 +41,10 @@ pipeline {
       }
     }
 
-    stage('Merging branch into develop') {
+    stage('Merging branches') {
       steps {
         // This is made to get these repositories in local
-        sh "git checkout ${params.branchName} && git checkout develop"
+        sh "git checkout ${params.branchName} && git checkout ${env.checkoutBranch}"
 
         // This is made to delete last merge-branch of previous result
         sh 'git branch | grep merge-branch > ./tmp.txt; if [[ "$(< ./tmp.txt)" == "  merge-branch" ]]; then git branch -d merge-branch; fi; rm -rf ./tmp.txt'

@@ -1,6 +1,7 @@
 def ENVIRONMENT_MAP = [
-  'Development': '*/develop;dev',
-  'Production': '*/main;prod',
+  'Development': 'develop;dev',
+  'Production': 'main;prod',
+  'Release': 'null;qa',
 ]
 
 pipeline {
@@ -16,6 +17,7 @@ pipeline {
     string(name: 'ecrRegistryCredential', defaultValue: '')
     string(name: 'awsCredentials', defaultValue: '')
     string(name: 'awsRegion', defaultValue: '')
+    string(name: 'baseRef', defaultValue: '')
   }
 
   options {
@@ -29,7 +31,7 @@ pipeline {
         script {
           def vars = ENVIRONMENT_MAP[params.environmentParam].split(';')
 
-          env.branchName = vars[0]
+          env.branchName = params.environmentParam == 'Release' ? baseRef : vars[0]
           env.suffix = vars[1]
         }
       }
@@ -39,7 +41,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.branchName]],
+          branches: [[name: "*/${env.branchName}"]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -89,7 +91,8 @@ pipeline {
             string(name: 'appRegistryUrl', value: params.appRegistryUrl),
             string(name: 'ecrRegistryCredential', value: params.ecrRegistryCredential),
             string(name: 'awsCredentials', value: params.awsCredentials),
-            string(name: 'awsRegion', value: params.awsRegion)
+            string(name: 'awsRegion', value: params.awsRegion),
+            string(name: 'baseRef', value: params.baseRef)
           ],
           wait: false,
           propagate: false

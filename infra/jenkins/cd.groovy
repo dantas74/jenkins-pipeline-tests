@@ -1,6 +1,7 @@
 def ENVIRONMENT_MAP = [
-    'Development': 'proesc-backend-dev-env;./infra/terraform/environments/dev;*/develop;dev',
-    'Production': 'proesc-backend-prod-env;./infra/terraform/environments/prod;*/main;prod',
+    'Development': 'proesc-backend-dev-env;./infra/terraform/environments/dev;develop;dev',
+    'Production': 'proesc-backend-prod-env;./infra/terraform/environments/prod;main;prod',
+    'Release': 'proesc-backend-dev-env;null;null;qa',
 ]
 
 def COLOR_MAP = [
@@ -19,6 +20,7 @@ pipeline {
     string(name: 'ecrRegistryCredential', defaultValue: '')
     string(name: 'awsCredentials', defaultValue: '')
     string(name: 'awsRegion', defaultValue: '')
+    string(name: 'baseRef', defaultValue: '')
   }
 
   options {
@@ -34,7 +36,7 @@ pipeline {
 
           env.credentialsFile = vars[0]
           env.terraformPath = vars[1]
-          env.branchName = vars[2]
+          env.branchName = params.environmentParam == 'Release' ? baseRef : vars[2]
           env.suffix = vars[3]
 
           env.clusterName = "${params.projectName}-CLU-${env.suffix}"
@@ -47,7 +49,7 @@ pipeline {
       steps {
         checkout([
           $class: 'GitSCM',
-          branches: [[name: env.branchName]],
+          branches: [[name: "*/${env.branchName}"]],
           extensions: [[$class: 'CleanCheckout']],
           doGenerateSubmoduleConfigurations: false,
           submoduleCfg: [],
@@ -61,6 +63,12 @@ pipeline {
         withCredentials([file(credentialsId: env.credentialsFile, variable: 'FILE')]) {
           sh 'use $FILE'
           sh "terraform -chdir=${env.terraformPath} apply -auto-approve"
+        }
+      }
+
+      when {
+        expression {
+          return params.environmentParam != 'Release'
         }
       }
     }

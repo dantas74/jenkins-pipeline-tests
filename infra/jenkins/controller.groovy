@@ -68,7 +68,7 @@ pipeline {
 
           // Validation of auxiliary branches
           env.auxiliaryCi = (
-            headRef ==~ /^(feature|hotfix|bugfix).*$/ && (action == 'opened' || action == 'reopened')
+            headRef ==~ /^(feature|hotfix|bugfix|release).*$/ && (action == 'opened' || action == 'reopened')
           )
 
           // Validation of dev environment
@@ -89,6 +89,11 @@ pipeline {
           ) || (pushRef == 'refs/heads/main') || (
             baseRef == 'main' && headRef ==~ /^(hotfix|release).*$/ && action == 'closed' && env.isGoingToDeploy.toBoolean()
           )
+
+          // Validation of unprovisioning release branch
+          env.unprovisionQa = (
+            baseRef == 'main' && headRef ==~ /^release.*$/ && action == 'closed' && env.isGoingToDeploy.toBoolean()
+          )
         }
       }
     }
@@ -100,7 +105,8 @@ pipeline {
             string(name: 'branchName', value: headRef),
             string(name: 'projectName', value: projectName),
             string(name: 'sshKey', value: sshKey),
-            string(name: 'githubWebhookToken', value: githubWebhookToken)
+            string(name: 'githubWebhookToken', value: githubWebhookToken),
+            string(name: 'baseRef', value: baseRef)
           ],
           wait: false,
           propagate: false
@@ -138,12 +144,19 @@ pipeline {
       }
     }
 
-    /*stage('Prod Environment') {
+    stage('Prod Environment') {
       steps {
-        // TODO: Change job to correct pipeline and environment
-        build job: "${env.projectName}/ci-dev",
+        build job: "${env.projectName}/ci",
           parameters: [
-            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy)
+            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy),
+            string(name: 'projectName', value: projectName),
+            string(name: 'sshKey', value: sshKey),
+            string(name: 'appRegistry', value: appRegistry),
+            string(name: 'environmentParam', value: 'Production'),
+            string(name: 'appRegistryUrl', value: appRegistryUrl),
+            string(name: 'ecrRegistryCredential', value: ecrRegistryCredential),
+            string(name: 'awsCredentials', value: awsCredentials),
+            string(name: 'awsRegion', value: awsRegion)
           ],
           wait: false,
           propagate: false
@@ -154,6 +167,51 @@ pipeline {
           return env.prodCiCd.toBoolean()
         }
       }
-    }*/
+    }
+
+    stage('Release Environment') {
+      steps {
+        build job: "${env.projectName}/ci",
+          parameters: [
+            booleanParam(name: 'isGoingToDeploy', value: isGoingToDeploy),
+            string(name: 'projectName', value: projectName),
+            string(name: 'sshKey', value: sshKey),
+            string(name: 'appRegistry', value: appRegistry),
+            string(name: 'environmentParam', value: 'Release'),
+            string(name: 'appRegistryUrl', value: appRegistryUrl),
+            string(name: 'ecrRegistryCredential', value: ecrRegistryCredential),
+            string(name: 'awsCredentials', value: awsCredentials),
+            string(name: 'awsRegion', value: awsRegion),
+            string(name: 'baseRef', value: baseRef)
+          ],
+          wait: false,
+          propagate: false
+      }
+
+      when {
+        expression {
+          return env.qaCiCd.toBoolean()
+        }
+      }
+    }
+
+    stage('Unprovision Release') {
+      steps {
+        script {
+          env.versionToTag = env.headRef.split('/')[1]
+        }
+
+        sh 'terraform -chdir=./infra/terraform/environments/release destroy -auto-approve'
+
+        sh "git tag ${env.versionToTag} main"
+        sh 'git push --tags'
+      }
+
+      when {
+        expression {
+          return env.unprovisionQa.toBoolean()
+        }
+      }
+    }
   }
 }
