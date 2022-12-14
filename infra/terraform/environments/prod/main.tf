@@ -22,10 +22,10 @@ provider "aws" {
 module "prod-stage" {
   source = "../../modules/ecs"
 
-  environment            = "Production"
-  AWS_REGION             = var.AWS_REGION
-  ECR_URI                = var.ECR_URI
-  ECS_EXECUTION_ROLE_ARN = var.ECS_EXECUTION_ROLE_ARN
-  APP_KEY                = var.APP_KEY
-  AWS_VPC_ID             = var.AWS_VPC_ID
+  environment                    = "Production"
+  quantity_of_availibility_zones = 3
+  AWS_REGION                     = var.AWS_REGION
+  ECR_URI                        = var.ECR_URI
+  ECS_EXECUTION_ROLE_ARN         = var.ECS_EXECUTION_ROLE_ARN
+  APP_KEY                        = var.APP_KEY
 }

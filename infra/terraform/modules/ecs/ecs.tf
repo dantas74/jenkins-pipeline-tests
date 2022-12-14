@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "proesc_backend_TD" {
   network_mode             = "awsvpc"
 
   container_definitions = templatefile(local.container_definitions_path, {
-    ECR_URI = local.environment_ecr_uri
+    ECR_URI = var.ECR_URI
     APP_KEY = var.APP_KEY
   })
 
@@ -59,7 +59,7 @@ resource "aws_ecs_service" "proesc-backend-SRV" {
   network_configuration {
     security_groups = [aws_security_group.proesc_backend_SG.id]
 
-    subnets = var.default_subnets
+    subnets = [for subnet in local.subnets[*] : subnet.id]
 
     assign_public_ip = true
   }

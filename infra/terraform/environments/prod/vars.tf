@@ -11,5 +11,3 @@ variable "ECR_URI" {}
 variable "ECS_EXECUTION_ROLE_ARN" {}
 
 variable "APP_KEY" {}
-
-variable "AWS_VPC_ID" {}

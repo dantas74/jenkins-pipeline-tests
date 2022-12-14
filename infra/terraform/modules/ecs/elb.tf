@@ -3,7 +3,7 @@ resource "aws_lb_target_group" "proesc_backend_TG" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = var.AWS_VPC_ID
+  vpc_id      = aws_vpc.proesc_backend_VPC.id
 
   health_check {
     enabled             = true
@@ -20,7 +20,7 @@ resource "aws_lb" "proesc_backend_ELB" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.proesc_backend_SG.id]
-  subnets            = var.default_subnets
+  subnets            = [for subnet in local.subnets[*] : subnet.id]
 
   tags = local.default_tags
 }
